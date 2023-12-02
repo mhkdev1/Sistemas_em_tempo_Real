@@ -31,35 +31,38 @@ int ativarAbs = 0;
 int vidros = 0;
 int luzes = 0;
 int travas = 0;
-int cintoPassageiro = 0;
 int cintoMotorista = 0;
 int injecaoEletronica = 0;
 int velocidade = 0;
 
 
+int ativandoLuzes = 0;    // Touch 0
 int ativandoVidros = 0;   // Touch 3
 int temp = 0;             // Touch 4
 int ativandoA = 0;        // Touch 5
 int ativandoAbs = 0;      // Touch 6
 int ativandoCM = 0;       // Touch 8
-int ativandoCP = 0;       // Touch 7
+int ativandoTravas = 0;   // Touch 7
 int ativandoInjecaoE = 0; // Touch 9
 
 //Declarando variaveus de tempo
-int64_t fimVdr, inicioVdr;
+uint64_t fimLuz, inicioLuz;
+uint64_t fimVdr, inicioVdr;
 uint64_t fimTem, inicioTem;
 uint64_t fimAbs, inicioAbs;
 uint64_t fimAir, inicioAir;
-uint64_t fimCP, inicioCP;
+uint64_t fimTravas, inicioTravas;
 uint64_t fimCM, inicioCM;
 uint64_t fimIE, inicioIE;
 
 //Declarando variaveis para calcular o tempo de execução
+
+double tempoLuz =0;
 double tempoVdr =0;
 double tempoTem = 0;
 double tempoAbs = 0;
 double tempoAir = 0;
-double tempoCP = 0;
+double tempoTravas = 0;
 double tempoCM = 0;
 double tempoIE = 0;
 
@@ -77,22 +80,47 @@ void display()
         xSemaphoreTake(mutual_exclusion_mutex, portMAX_DELAY);
         printf("\t\t------\tMONITORAMENT DO VEICULO\t-----\n\n");
 
-        if (vidros == 0)
+
+        if (travas == 0)
         {
-            printf("\nVidros dianteiros                   |\t Desativada");
+            printf("\nTravas                               |\t Desativada");
+            printf("\n--------------------------------------------------------------------------------");
         }
         else
         {
-            printf("\nVidros dianteiros                   |\t Ativada \t          |  Tempo de execução: %lf", tempoIE);
+            printf("\nLuzes                               |\t Ativada \t          |  Tempo de execução: %lf", tempoTravas);
+            printf("\n--------------------------------------------------------------------------------");
+        }
+        if (luzes == 0)
+        {
+            printf("\nLuzes                               |\t Desativada");
+            printf("\n--------------------------------------------------------------------------------");
+        }
+        else
+        {
+            printf("\nLuzes                               |\t Ativada \t          |  Tempo de execução: %lf", tempoLuz);
+            printf("\n--------------------------------------------------------------------------------");
+        }
+        if (vidros == 0)
+        {
+            printf("\nVidros dianteiros                   |\t Desativada");
+            printf("\n--------------------------------------------------------------------------------");
+        }
+        else
+        {
+            printf("\nVidros dianteiros                   |\t Ativada \t          |  Tempo de execução: %lf", tempoVdr);
+            printf("\n--------------------------------------------------------------------------------");
         }
 
         if (injecaoEletronica == 0)
         {
             printf("\nInjeção eletronica                  |\t Desativada");
+            printf("\n--------------------------------------------------------------------------------");
         }
         else
         {
             printf("\nInjeção eletronica                  |\t Ativada \t          |  Tempo de execução: %lf", tempoIE);
+            printf("\n--------------------------------------------------------------------------------");
         }
         printf("\n--------------------------------------------------------------------------------");
         if (temperatura == 1)
@@ -123,13 +151,13 @@ void display()
             printf("\nAirbag                              |\t Ativado  \t                        | Tempo de execução: %lf", tempoAir);
         }
         printf("\n--------------------------------------------------------------------------------");
-        if (cintoPassageiro == 0)
+        if (travas == 0)
         {
             printf("\nCinto de segurança do passageiro    |\t Sem Cinto de Segurança");
         }
         else
         {
-            printf("\nCinto de segurança do passageiro    |\t Com Cinto de Segurança \t          |  Tempo de execução: %lf", tempoCP);
+            printf("\nCinto de segurança do passageiro    |\t Com Cinto de Segurança \t          |  Tempo de execução: %lf", tempoTravas);
         }
         printf("\n--------------------------------------------------------------------------------");
         if (cintoMotorista == 0)
@@ -145,7 +173,8 @@ void display()
     }
 }
 
-static void sensorVidros(void)
+
+static void sensorTravas(void)
 {
     while (1)
     {
@@ -154,15 +183,39 @@ static void sensorVidros(void)
         {
             vTaskDelay(20 / portTICK_PERIOD_MS);
             xSemaphoreTake(mutual_exclusion_mutex, portMAX_DELAY);
-            if(vidros == 0){
-                vidros = 1;
+            if(luzes == 0){
+                luzes = 1;
             } else {
-                vidros = 0;
+                luzes = 0;
             }
-            ativandoVidros = 0;
+            ativandoLuzes = 0;
             xSemaphoreGive(mutual_exclusion_mutex);
-            fimVdr = esp_timer_get_time();
-            tempoVdr = ((fimVdr - inicioVdr)/1000);
+            fimLuz = esp_timer_get_time();
+            tempoLuz = ((fimLuz - inicioLuz)/1000);
+
+        }
+        vTaskDelay(10 / portTICK_PERIOD_MS);
+
+    }
+}
+static void sensorLuzes(void)
+{
+    while (1)
+    {
+        
+        if (vidros == 1)
+        {
+            vTaskDelay(20 / portTICK_PERIOD_MS);
+            xSemaphoreTake(mutual_exclusion_mutex, portMAX_DELAY);
+            if(luzes == 0){
+                luzes = 1;
+            } else {
+                luzes = 0;
+            }
+            ativandoLuzes = 0;
+            xSemaphoreGive(mutual_exclusion_mutex);
+            fimLuz = esp_timer_get_time();
+            tempoLuz = ((fimLuz - inicioLuz)/1000);
 
         }
         vTaskDelay(10 / portTICK_PERIOD_MS);
@@ -246,17 +299,30 @@ static void read_task(void *pvParameter)
                 //Realiza a operação conforme qual sensor foi ativado
                 
                 
-                if (i == 3) //Alteração na temperatura
+                if (i == 0) //Alteração na temperatura
                 {
-                    inicioTem = esp_timer_get_time();
+                    inicioLuz = esp_timer_get_time();
 
-                    if (temp == 0)
+                    if (luzes == 0)
                     {
-                        temp = 1;
+                        luzes = 1;
                     }
                     else
                     {
-                        temp = 0;
+                        luzes = 0;
+                    }
+                }
+                else if (i == 3) //Alteração na temperatura
+                {
+                    inicioVdr = esp_timer_get_time();
+
+                    if (vidros == 0)
+                    {
+                        vidros = 1;
+                    }
+                    else
+                    {
+                        vidros = 0;
                     }
                 }
                 else if (i == 4) //Alteração na temperatura
@@ -302,15 +368,15 @@ static void read_task(void *pvParameter)
                 }
                 else if (i == 7) //Alteração no cinto do passageiro
                 {
-                    inicioCP = esp_timer_get_time();
+                    inicioTravas = esp_timer_get_time();
                     //se for igual a 0 atualiza para 1, caso contrario para 0
-                    if (ativandoCP == 0)
+                    if (ativandoTravas == 0)
                     {
-                        ativandoCP = 1;
+                        ativandoTravas = 1;
                     }
                     else
                     {
-                        ativandoCP = 0;
+                        ativandoTravas = 0;
                     }
                 }
                 else if (i == 8) //Alteração no cinto do motorista
@@ -448,24 +514,24 @@ static void sensorAbs(void)
 }
 
 //SENSOR DO CINTO DE SEGURANÇA
-static void sensorCintoPassageiro(void)
+static void sensortravas(void)
 {
     while (1)
     {
         
-        if (ativandoCP == 1)
+        if (ativandoTravas == 1)
         {
             vTaskDelay(1000 / portTICK_PERIOD_MS);
             xSemaphoreTake(mutual_exclusion_mutex, portMAX_DELAY);
-            if(cintoPassageiro == 0){
-                cintoPassageiro = 1;
+            if(travas == 0){
+                travas = 1;
             } else {
-                cintoPassageiro = 0;
+                travas = 0;
             }
-            ativandoCP = 0;
+            ativandoTravas = 0;
             xSemaphoreGive(mutual_exclusion_mutex);
-            fimCP = esp_timer_get_time();
-            tempoCP = ((fimCP - inicioCP)/1000);
+            fimTravas = esp_timer_get_time();
+            tempoTravas = ((fimTravas - inicioTravas)/1000);
 
         }
         vTaskDelay(10 / portTICK_PERIOD_MS);
@@ -525,9 +591,13 @@ void app_main(void)
     xTaskCreatePinnedToCore(&display, "display", 2048, NULL, 2, NULL, 1); // inicia task para display
     xTaskCreatePinnedToCore(&read_task, "read_task", 2048, NULL, 17, NULL, 1);
     xTaskCreatePinnedToCore(&sensorCintoMotorista, "sensorCintoMotorista", 2048, NULL, 11, NULL, 1);
-    xTaskCreatePinnedToCore(&sensorCintoPassageiro, "sensorCintoPassageiro", 2048, NULL, 10, NULL, 1);
+    xTaskCreatePinnedToCore(&sensortravas, "sensortravas", 2048, NULL, 10, NULL, 1);
     xTaskCreatePinnedToCore(&sensorAbs, "sensorAbs", 2048, NULL, 8, NULL, 0);
     xTaskCreatePinnedToCore(&sensorAibag, "sensorAibag", 2048, NULL, 15, NULL, 0);
     xTaskCreatePinnedToCore(&sensorTemperatura, "sensorTemperatura", 2048, NULL, 3, NULL, 1);
-    xTaskCreatePinnedToCore(&sensorInjecao, "sensorInjecao", 2048, NULL, 14, NULL, 0);
+    xTaskCreatePinnedToCore(&sensorLuzes, "sensorLuzes", 2048, NULL, 14, NULL, 1);
+    xTaskCreatePinnedToCore(&sensorVidros, "sensorVidros", 2048, NULL, 14, NULL, 1);
+    
+
+
 }
