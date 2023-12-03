@@ -41,8 +41,8 @@ int ativandoVidros = 0;   // Touch 3 D15
 int temp = 0;             // Touch 4 D13
 int ativandoA = 0;        // Touch 5 D12 
 int ativandoAbs = 0;      // Touch 6 D14
-int ativandoCM = 0;       // Touch 7 D27
-int ativandoTravas = 0;   // Touch 8 D33
+int ativandoCM = 0;       // Touch 8 D27
+int ativandoTravas = 0;   // Touch 7 D33
 int ativandoInjecaoE = 0; // Touch 9 D32
 
 //Declarando variaveus de tempo
@@ -87,13 +87,13 @@ void display()
 {
     while (1)
     {
-        vTaskDelay(500 / portTICK_PERIOD_MS);
+        vTaskDelay(1000 / portTICK_PERIOD_MS);
         system("cls");
         xSemaphoreTake(mutual_exclusion_mutex, portMAX_DELAY);
         printf("\t\t------\tMONITORAMENT DO VEICULO\t-----\n\n");
 
 
-        if (travas == 0)
+        if (ativandoTravas == 0)
         {
             printf("\nTravas                               |\t Desativada \t\t\t\t\t\t|  Tempo de execução: %lf  MenorTempo: %llu  Maior Tempo %llu", tempoTravas,tempoMenorTravas,tempoMaiorTravas);
             printf("\n--------------------------------------------------------------------------------");
@@ -103,7 +103,7 @@ void display()
             printf("\tTravas                               |\t Ativada \t\t\t\t\t\t|  Tempo de execução: %lf  MenorTempo: %llu  Maior Tempo %llu", tempoTravas,tempoMenorTravas,tempoMaiorTravas);
             printf("\n--------------------------------------------------------------------------------");
         }
-        if (luzes == 0)
+        if (ativandoLuzes == 0)
         {
             printf("\nLuzes                               |\t Desativada\t\t\t\t\t\t|  Tempo de execução: %lf  MenorTempo: %llu  Maior Tempo %llu", tempoLuz, tempoMenorLuz,tempoMaiorLuz);
             printf("\n--------------------------------------------------------------------------------");
@@ -113,7 +113,7 @@ void display()
             printf("\nLuzes                               |\t Ativada \t\t\t\t\t\t|  Tempo de execução: %lf  MenorTempo: %llu  Maior Tempo %llu", tempoLuz, tempoMenorLuz,tempoMaiorLuz);
             printf("\n--------------------------------------------------------------------------------");
         }
-        if (vidros == 0)
+        if (ativandoVidros == 0)
         {
             printf("\nVidros dianteiros                   |\t Desativada\t\t\t\t\t\t|  Tempo de execução: %lf    MenorTempo: %llu  Maior Tempo %llu", tempoVdr, tempoMenorVdr,tempoMaiorVdr);
             printf("\n--------------------------------------------------------------------------------");
@@ -124,7 +124,7 @@ void display()
             printf("\n--------------------------------------------------------------------------------");
         }
 
-        if (injecaoEletronica == 0)
+        if (ativandoInjecaoE == 0)
         {
             printf("\nInjeção eletronica                  |\t Desativada\t\t\t\t\t\t|  Tempo de execução: %lf   MenorTempo: %llu  Maior Tempo %llu", tempoIE,tempoMaiorIE,tempoMenorIE);
             printf("\n--------------------------------------------------------------------------------");
@@ -135,7 +135,7 @@ void display()
             printf("\n--------------------------------------------------------------------------------");
         }
         printf("\n--------------------------------------------------------------------------------");
-        if (temperatura == 1)
+        if (temp == 1)
         {
             printf("\nTemperatura motor                   |\t Alta \t\t\t\t\t\t|  Tempo de execução: %lf   MenorTempo: %llu  Maior Tempo %llu", tempoTem,tempoMenorTem,tempoMaiorTem);
             printf("\n--------------------------------------------------------------------------------");
@@ -145,7 +145,7 @@ void display()
             printf("\nTemperatura motor                   |\t Normal\t\t\t\t\t\t|  Tempo de execução: %lf   MenorTempo: %llu  Maior Tempo %llu", tempoTem,tempoMenorTem,tempoMaiorTem);
             printf("\n--------------------------------------------------------------------------------");
         }
-        if (ativarAbs == 0)
+        if (ativandoAbs == 0)
         {
             printf("\nAbs Dianteiro                       |\t Desativado \t\t\t\t\t\t\t|  Tempo de execução: %lf   MenorTempo: %llu  Maior Tempo %llu", tempoAbs,tempoMenorAbs,tempoMaiorAbs);
         }
@@ -154,7 +154,7 @@ void display()
             printf("\nAbs Dianteiro                       |\t Ativado  \t\t\t\t\t\t\t|  Tempo de execução: %lf   MenorTempo: %llu  Maior Tempo %llu", tempoAbs,tempoMenorAbs,tempoMaiorAbs);
         }
         printf("\n--------------------------------------------------------------------------------");
-        if (airbag == 0)
+        if (ativandoA == 0)
         {
             printf("\nAirbag                              |\t Desativado\t\t\t\t\t\t\t| Tempo de execução: %lf   MenorTempo: %llu  Maior Tempo %llu", tempoAir,tempoMenorAir,tempoMaiorAir);
         }
@@ -164,7 +164,7 @@ void display()
         }
         printf("\n--------------------------------------------------------------------------------");
         //printf("\n--------------------------------------------------------------------------------");
-        if (cintoMotorista == 0)
+        if (ativandoCM == 0)
         {
             printf("\nCinto de segurança do motorista     |\t Sem Cinto de Segurança  \t\t\t\t|  Tempo de execução: %lf   MenorTempo: %llu  Maior Tempo %llu", tempoCM, tempoMenorCM,tempoMaiorCM);
         }
@@ -225,7 +225,7 @@ static void read_task(void *pvParameters)
     while (1)
     {
         touch_pad_intr_enable();
-        /*for (int i = 0; i < TOUCH_PAD_MAX; i++)
+        for (int i = 0; i < TOUCH_PAD_MAX; i++)
         {
             if (s_pad_activated[i] == true) //Verifica qual touch foi ativado
             {
@@ -263,13 +263,13 @@ static void read_task(void *pvParameters)
                 {
                     inicioTem = esp_timer_get_time();
 
-                    if (temp == 0)
+                    if (temperatura == 0)
                     {
-                        temp = 1;
+                        temperatura = 1;
                     }
                     else
                     {
-                        temp = 0;
+                        temperatura = 0;
                     }
                 }
                 else if (i == 5) //Alteração no airbag
@@ -277,13 +277,13 @@ static void read_task(void *pvParameters)
                     inicioAir = esp_timer_get_time();
 
                     //se for igual a 0 atualiza para 1, caso contrario para 0
-                    if (ativandoA == 0) 
+                    if (airbag == 0) 
                     {
-                        ativandoA = 1;
+                        airbag = 1;
                     }
                     else
                     {
-                        ativandoA = 0;
+                        airbag = 0;
                     }
                 }
                 else if (i == 6) //Alteração no Abs
@@ -291,58 +291,59 @@ static void read_task(void *pvParameters)
                     inicioAbs = esp_timer_get_time();
 
                     //se for igual a 0 atualiza para 1, caso contrario para 0
-                    if (ativandoAbs == 0)
+                    if (ativarAbs == 0)
                     {
-                        ativandoAbs = 1;
+                        ativarAbs = 1;
                     }
                     else
                     {
-                        ativandoAbs = 0;
+                        ativarAbs = 0;
                     }
                 }
                 else if (i == 7) //Alteração no cinto do passageiro
                 {
                     inicioTravas = esp_timer_get_time();
                     //se for igual a 0 atualiza para 1, caso contrario para 0
-                    if (ativandoTravas == 0)
+                    if (travas == 0)
                     {
-                        ativandoTravas = 1;
+                        travas = 1;
                     }
                     else
                     {
-                        ativandoTravas = 0;
+                        travas = 0;
                     }
                 }
                 else if (i == 8) //Alteração no cinto do motorista
                 {
                     inicioCM = esp_timer_get_time();
                     //se for igual a 0 atualiza para 1, caso contrario para 0
-                    if (ativandoCM == 0)
+                    if (cintoMotorista == 0)
                     {
-                        ativandoCM = 1;
+                        cintoMotorista = 1;
                     }
                     else
                     {
-                        ativandoCM = 0;
+                        cintoMotorista = 0;
                     }
                 }
                 else if (i == 9)
                 {
                     inicioIE = esp_timer_get_time();
                     //se for igual a 0 atualiza para 1, caso contrario para 0
-                    if (ativandoInjecaoE == 0)
+                    if (injecaoEletronica == 0)
                     {
-                        ativandoInjecaoE = 1;
+                        injecaoEletronica = 1;
                     }
                     else
                     {
-                        ativandoInjecaoE = 0;
+                        injecaoEletronica = 0;
                     }
                 }
                 //i++;
             }
         }
-        vTaskDelay(10 / portTICK_PERIOD_MS); */
+        vTaskDelay(10 / portTICK_PERIOD_MS); 
+        /*xSemaphoreTake(mutual_exclusion_mutex, portMAX_DELAY);
 
         if(s_pad_activated[0]== true){
             luzes = 1;
@@ -384,14 +385,22 @@ static void read_task(void *pvParameters)
         } else {
             injecaoEletronica = 0 ;
         }
-        
+        xSemaphoreGive(mutual_exclusion_mutex);
+
+        for (int i = 0; i < TOUCH_PAD_MAX; i++)
+        {
+            
+            s_pad_activated[i] = false; //Atualiza para false
+        }
+        vTaskDelay(10 / portTICK_PERIOD_MS);*/
     }
 }
 
 static void sensorVidros(void *pvParameters)
 {
     while (1)
-    {
+    {   
+        
         
         if (vidros == 1)
         {
@@ -401,55 +410,56 @@ static void sensorVidros(void *pvParameters)
                 ativandoVidros = 1;
             } 
             vTaskDelay(1000 / portTICK_PERIOD_MS);
-            
-            xSemaphoreGive(mutual_exclusion_mutex);
-            
-
-        }else{
             ativandoVidros = 0;
-        }
-        fimVdr = esp_timer_get_time();
-        tempoVdr = ((fimVdr - inicioVdr)/1000);
+            xSemaphoreGive(mutual_exclusion_mutex);
+            fimVdr = esp_timer_get_time();
+            tempoVdr = ((fimVdr - inicioVdr)/1000);
 
-        if ( tempoVdr < tempoMenorVdr) {
+            if ( tempoVdr < tempoMenorVdr) {
                 tempoMenorVdr = tempoVdr;
-        }
+            }
 
-        if (tempoVdr > tempoMaiorVdr) {
+            if (tempoVdr > tempoMaiorVdr) {
                 tempoMaiorVdr = tempoVdr;
+            }
         }
-        vTaskDelay(20 / portTICK_PERIOD_MS);
+            
+
+        
+        vTaskDelay(10 / portTICK_PERIOD_MS);
 
     }
 }
 static void sensorLuzes(void *pvParameters)
 {
     while (1)
-    {
+    {   
+        
         
         if (luzes == 1)
         {
             vTaskDelay(1000 / portTICK_PERIOD_MS);
             xSemaphoreTake(mutual_exclusion_mutex, portMAX_DELAY);
-            if(luzes == 0){
-                luzes = 1;
-            } else {
-                luzes = 0;
-            }
-                ativandoLuzes = 0;
-            xSemaphoreGive(mutual_exclusion_mutex);
-            fimLuz = esp_timer_get_time();
+            if(ativandoLuzes == 0){
+                ativandoLuzes = 1;
+            } 
+            ativandoLuzes =0;
+                
+           xSemaphoreGive(mutual_exclusion_mutex);
+           fimLuz = esp_timer_get_time();
             tempoLuz = ((fimLuz - inicioLuz)/1000);
-/*
+
             if (tempoLuz < tempoMenorLuz) {
                 tempoMenorLuz = tempoLuz;
             }
 
             if (tempoLuz > tempoMaiorLuz) {
                 tempoMaiorLuz = tempoLuz;
-            } */
+            } 
 
         }
+         
+        
         vTaskDelay(10 / portTICK_PERIOD_MS);
 
     }
@@ -459,18 +469,18 @@ static void sensorLuzes(void *pvParameters)
 static void sensorInjecao(void *pvParameters)
 {
     while (1)
-    {
+    {   
+        //inicioIE =esp_timer_get_time();
         
-        if (ativandoInjecaoE == 1)
+        if (injecaoEletronica == 1)
         {
-            vTaskDelay(0.5 / portTICK_PERIOD_MS);
+            vTaskDelay(5 / portTICK_PERIOD_MS);
             xSemaphoreTake(mutual_exclusion_mutex, portMAX_DELAY);
-            if(injecaoEletronica == 0){
-                injecaoEletronica = 1;
-            } else {
-                injecaoEletronica = 0;
-            }
+            if(ativandoInjecaoE == 0){
+                ativandoInjecaoE = 1;
+            } 
             ativandoInjecaoE = 0;
+           
             xSemaphoreGive(mutual_exclusion_mutex);
             fimIE = esp_timer_get_time();
             tempoIE = ((fimIE - inicioIE)/1000);
@@ -481,8 +491,11 @@ static void sensorInjecao(void *pvParameters)
             if (tempoIE > tempoMaiorIE) {
                 tempoMaiorIE = tempoIE;
             }
+            
 
         }
+
+        
         vTaskDelay(10 / portTICK_PERIOD_MS);
     }
 }
@@ -491,18 +504,17 @@ static void sensorInjecao(void *pvParameters)
 static void sensorTemperatura(void *pvParameters) 
 {
     while (1)
-    {
+    {   
+        //inicioTem = esp_timer_get_time();
         
-        if (temp == 1)
+        if (temperatura == 1)
         {
             vTaskDelay(20 / portTICK_PERIOD_MS);
             xSemaphoreTake(mutual_exclusion_mutex, portMAX_DELAY);
-            if(temperatura == 0){
-                temperatura = 1;
-            } else {
-                temperatura = 0;
+            if(temp == 0){
+                temp = 1;
             }
-            temp = 0;
+              temp = 0;
             xSemaphoreGive(mutual_exclusion_mutex);
             fimTem = esp_timer_get_time();
             tempoTem = ((fimTem - inicioTem)/1000);
@@ -513,9 +525,10 @@ static void sensorTemperatura(void *pvParameters)
             if (tempoTem > tempoMaiorTem) {
                 tempoMaiorTem = tempoTem;
             }
-            
+                      
 
         }
+        
         vTaskDelay(10 / portTICK_PERIOD_MS);
 
     }
@@ -525,18 +538,17 @@ static void sensorTemperatura(void *pvParameters)
 static void sensorAibag(void *pvParameters)
 {
     while (1)
-    {
+    {   
+        inicioAir =esp_timer_get_time();
         
-        if (ativandoA == 1)
+        if (airbag == 1)
         {
             vTaskDelay(100 / portTICK_PERIOD_MS);
             xSemaphoreTake(mutual_exclusion_mutex, portMAX_DELAY);
-            if(airbag == 0){
-                airbag = 1;
-            } else {
-                airbag = 0;
+            if(ativandoA == 0){
+                ativandoA = 1;
             }
-            ativandoA = 0;
+            ativandoA =0;
             xSemaphoreGive(mutual_exclusion_mutex);
             fimAir = esp_timer_get_time();
             tempoAir = ((fimAir - inicioAir)/1000);
@@ -547,8 +559,11 @@ static void sensorAibag(void *pvParameters)
             if (tempoAir > tempoMaiorAir) {
                 tempoMaiorAir = tempoAir;
             }
+            
 
         }
+        
+            
         vTaskDelay(10 / portTICK_PERIOD_MS);
     }
 }
@@ -558,17 +573,16 @@ static void sensorAbs(void *pvParameters)
 {
     while (1)
     {
-        
-        if (ativandoAbs == 1)
+        //inicioAbs =esp_timer_get_time();
+        if (ativarAbs == 1)
         {
             vTaskDelay(100 / portTICK_PERIOD_MS);
             xSemaphoreTake(mutual_exclusion_mutex, portMAX_DELAY);
-            if(ativarAbs == 0){
-                ativarAbs = 1;
-            } else {
-                ativarAbs = 0;
-            }
-            ativandoAbs = 0;
+            if(ativandoAbs == 0){
+                ativandoAbs = 1;
+            } 
+            ativandoAbs=0;
+            
             xSemaphoreGive(mutual_exclusion_mutex);
             fimAbs = esp_timer_get_time();
             tempoAbs = ((fimAbs - inicioAbs)/1000);
@@ -579,6 +593,7 @@ static void sensorAbs(void *pvParameters)
             if (tempoAbs > tempoMaiorAbs) {
                 tempoMaiorAbs = tempoAbs;
             }
+            
 
         }
         vTaskDelay(10 / portTICK_PERIOD_MS);
@@ -590,17 +605,16 @@ static void sensortravas(void *pvParameters)
 {
     while (1)
     {
-        
-        if (ativandoTravas == 1)
+        //inicioTravas = esp_timer_get_time();
+        if (travas == 1)
         {
             vTaskDelay(1000 / portTICK_PERIOD_MS);
             xSemaphoreTake(mutual_exclusion_mutex, portMAX_DELAY);
-            if(travas == 0){
-                travas = 1;
-            } else {
-                travas = 0;
-            }
-            ativandoTravas = 0;
+            if(ativandoTravas == 0){
+                ativandoTravas= 1;
+            } 
+            ativandoTravas=0;
+           
             xSemaphoreGive(mutual_exclusion_mutex);
             fimTravas = esp_timer_get_time();
             tempoTravas = ((fimTravas - inicioTravas)/1000);
@@ -611,8 +625,10 @@ static void sensortravas(void *pvParameters)
             if (tempoTravas > tempoMaiorTravas) {
                 tempoMaiorTravas = tempoTravas;
             }
+            
 
         }
+        
         vTaskDelay(10 / portTICK_PERIOD_MS);
     }
 }
@@ -622,17 +638,15 @@ static void sensorCintoMotorista(void *pvParameters)
 {
     while (1)
     {
-        
-        if (ativandoCM == 1)
+        //inicioCM =esp_timer_get_time();
+        if (cintoMotorista == 1)
         {
             vTaskDelay(1000 / portTICK_PERIOD_MS);
             xSemaphoreTake(mutual_exclusion_mutex, portMAX_DELAY);
-            if(cintoMotorista == 0){
-                cintoMotorista = 1;
-            } else {
-                cintoMotorista = 0;
-            }
-            ativandoCM = 0;
+            if(ativandoCM == 0){
+                ativandoCM = 1;
+            } 
+            ativandoCM =0;
             xSemaphoreGive(mutual_exclusion_mutex);
             fimCM = esp_timer_get_time();
             tempoCM = ((fimCM - inicioCM)/1000);
@@ -643,8 +657,10 @@ static void sensorCintoMotorista(void *pvParameters)
             if (tempoCM > tempoMaiorCM) {
                 tempoMaiorCM = tempoCM;
             }
+            
 
         }
+        
         vTaskDelay(10 / portTICK_PERIOD_MS);
     }
 }
@@ -683,7 +699,7 @@ void app_main(void)
     xTaskCreatePinnedToCore(&sensorTemperatura, "sensorTemperatura", 2048, NULL, 3, NULL, 1);
     xTaskCreatePinnedToCore(&sensorLuzes, "sensorLuzes", 2048, NULL, 4, NULL, 1);
     xTaskCreatePinnedToCore(&sensorVidros, "sensorVidros", 2048, NULL, 4, NULL, 1);
-    xTaskCreatePinnedToCore(&sensorInjecao, "sensorInjecao", 2048, NULL, 1, NULL, 0);
+    xTaskCreatePinnedToCore(&sensorInjecao, "sensorInjecao", 2048, NULL, 0, NULL, 0);
     
     //vTaskStartScheduler();
 
